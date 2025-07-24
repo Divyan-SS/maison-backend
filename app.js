@@ -74,7 +74,15 @@ app.post('/api/book', async (req, res) => {
   };
 
   try {
-    const adminMail = adminMailTemplate(bookingId, name, email, date, formattedTime, members, PORT);
+    const adminMail = adminMailTemplate(
+      bookingId,
+      name,
+      email,
+      date,
+      formattedTime,
+      members,
+      'https://maison-backend-vsx4.onrender.com' // ✅ Updated Render URL
+    );
     const userMail = userConfirmationTemplate(name, date, formattedTime, members);
     const transporter = await getTransporter();
 
@@ -99,34 +107,7 @@ app.post('/api/book', async (req, res) => {
       success: false,
       message: 'Booking Failed ❌\nFailed to send emails.',
     });
-  }try {
-  const adminMail = adminMailTemplate(bookingId, name, email, date, formattedTime, members, 'https://maison-backend-00ht.onrender.com');
-  const userMail = userConfirmationTemplate(name, date, formattedTime, members);
-  const transporter = await getTransporter();
-
-  await transporter.sendMail({
-    from: `"Maison d'Élite" <${SENDER_EMAIL}>`,
-    to: SENDER_EMAIL,
-    subject: adminMail.subject,
-    html: adminMail.html,
-  });
-
-  await transporter.sendMail({
-    from: `"Maison d'Élite" <${SENDER_EMAIL}>`,
-    to: email,
-    subject: userMail.subject,
-    html: userMail.html,
-  });
-
-  res.status(200).json({ success: true, message: 'Booking request sent.' });
-} catch (err) {
-  console.error('📧 Email sending failed:', err);
-  res.status(500).json({
-    success: false,
-    message: 'Booking Failed ❌\nFailed to send emails.',
-  });
-}
-
+  }
 });
 
 // Admin Response Page
@@ -336,8 +317,6 @@ app.post('/api/contact', async (req, res) => {
   }
 });
 
-
-// ------------------------------------
 app.listen(PORT, () => {
   console.log(`🚀 Maison d'Élite backend running at http://localhost:${PORT}`);
 });
