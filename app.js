@@ -13,7 +13,14 @@ const PORT = 5000;
 const SENDER_EMAIL = 'divyansample1@gmail.com';
 const SENDER_PASS = 'spvwralflmgzxsxj';
 
-app.use(cors());
+const corsOptions = {
+  origin: 'https://maison-delite-frontend.netlify.app',
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type'],
+  credentials: true,
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
 
 app.get('/', (req, res) => {
@@ -244,10 +251,12 @@ app.get('/api/respond', async (req, res) => {
 // ✅ FIXED CONTACT FORM HANDLER
 app.post('/api/contact', async (req, res) => {
   const { name, email, message } = req.body;
+  console.log('📨 Contact form submission received:', { name, email, message });
 
   if (!name?.trim() || !email?.trim() || !message?.trim()) {
     return res.status(400).json({ success: false, message: 'All fields are required.' });
   }
+
 
   const escapeHTML = (text) =>
     text.replace(/&/g, '&amp;')
