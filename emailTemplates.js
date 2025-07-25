@@ -11,7 +11,7 @@ const formatTime = (timeStr) => {
   return `${hour12}:${m} ${suffix}`;
 };
 
-function adminMailTemplate(bookingId, name, email, date, time, members) {
+function adminMailTemplate(bookingId, name, email, date, time, members, baseUrl) {
   const formattedTime = formatTime(time);
 
   return {
@@ -27,7 +27,7 @@ function adminMailTemplate(bookingId, name, email, date, time, members) {
         <p style="font-size: 16px;"><strong>Members:</strong> ${members}</p>
 
         <div style="margin: 30px 0; text-align: center;">
-          <a href="https://maison-backend-vsx4.onrender.com/admin/respond?bookingId=${bookingId}"
+          <a href="${baseUrl}/admin/respond?bookingId=${bookingId}"
              style="background-color: #1abc9c; color: white; padding: 14px 28px; font-size: 16px; text-decoration: none; border-radius: 8px; display: inline-block;">
             📨 Respond to this Booking
           </a>
@@ -38,6 +38,7 @@ function adminMailTemplate(bookingId, name, email, date, time, members) {
     `
   };
 }
+
 
 const userConfirmationTemplate = (name, date, time, members) => {
   const formattedTime = formatTime(time);
