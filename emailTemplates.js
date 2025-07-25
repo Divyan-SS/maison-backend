@@ -39,7 +39,6 @@ function adminMailTemplate(bookingId, name, email, date, time, members, baseUrl)
   };
 }
 
-
 const userConfirmationTemplate = (name, date, time, members) => {
   const formattedTime = formatTime(time);
 
@@ -125,8 +124,26 @@ const userResponseTemplate = (name, status, date, time, members, availableSeats 
   };
 };
 
+// ✅ NEW: Contact Mail Template for admin
+const contactMailTemplate = (name, email, message) => {
+  return {
+    subject: '📬 New Contact Form Submission – Maison d\'Élite',
+    html: `
+      <div style="font-family: 'Segoe UI', sans-serif; padding: 24px; background-color: #fcfcfc; border-radius: 10px; border: 1px solid #ddd; max-width: 600px; margin: auto;">
+        <h2 style="color: #34495e; text-align: center;">📬 Contact Message Received</h2>
+        <p style="font-size: 16px;"><strong>Name:</strong> ${name}</p>
+        <p style="font-size: 16px;"><strong>Email:</strong> ${email}</p>
+        <p style="font-size: 16px;"><strong>Message:</strong></p>
+        <p style="font-size: 15px; background: #f4f4f4; padding: 15px; border-radius: 6px;">${message}</p>
+        <p style="text-align: center; font-size: 13px; color: #888;">Maison d'Élite • Please respond at your earliest convenience.</p>
+      </div>
+    `
+  };
+};
+
 module.exports = {
   adminMailTemplate,
   userConfirmationTemplate,
-  userResponseTemplate
+  userResponseTemplate,
+  contactMailTemplate // ✅ Exported for contact route
 };

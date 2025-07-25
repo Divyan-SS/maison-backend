@@ -16,7 +16,6 @@ const SENDER_PASS = 'spvwralflmgzxsxj';
 app.use(cors());
 app.use(express.json());
 
-// ✅ Root route added
 app.get('/', (req, res) => {
   res.send('API is running...');
 });
@@ -38,9 +37,6 @@ const formatTime = (timeStr) => {
   return `${hour12}:${m} ${suffix}`;
 };
 
-// ------------------------------------
-// GMAIL MAIL TRANSPORTER
-// ------------------------------------
 let transporterPromise = Promise.resolve(
   nodemailer.createTransport({
     service: 'gmail',
@@ -51,14 +47,10 @@ let transporterPromise = Promise.resolve(
   })
 );
 
-// Helper to get the ready transporter
 async function getTransporter() {
   return await transporterPromise;
 }
 
-// ------------------------------------
-// Booking Endpoint
-// ------------------------------------
 app.post('/api/book', async (req, res) => {
   const { name, email, date, time, members } = req.body;
 
@@ -91,7 +83,6 @@ app.post('/api/book', async (req, res) => {
     const userMail = userConfirmationTemplate(name, date, formattedTime, members);
     const transporter = await getTransporter();
 
-    // Send to admin
     await transporter.sendMail({
       from: `"Maison d'Élite" <${SENDER_EMAIL}>`,
       to: SENDER_EMAIL,
@@ -99,7 +90,6 @@ app.post('/api/book', async (req, res) => {
       html: adminMail.html,
     });
 
-    // Send confirmation to user
     await transporter.sendMail({
       from: `"Maison d'Élite" <${SENDER_EMAIL}>`,
       to: email,
@@ -117,9 +107,6 @@ app.post('/api/book', async (req, res) => {
   }
 });
 
-// ------------------------------------
-// Admin Response Page (UI)
-// ------------------------------------
 app.get('/admin/respond', (req, res) => {
   const { bookingId } = req.query;
   const booking = bookings[bookingId];
@@ -219,9 +206,6 @@ app.get('/admin/respond', (req, res) => {
   `);
 });
 
-// ------------------------------------
-// Admin Respond API
-// ------------------------------------
 app.get('/api/respond', async (req, res) => {
   const { bookingId, status, seats } = req.query;
   const booking = bookings[bookingId];
@@ -257,9 +241,7 @@ app.get('/api/respond', async (req, res) => {
   }
 });
 
-// ------------------------------------
-// Contact Form Endpoint
-// ------------------------------------
+// ✅ UPDATED CONTACT FORM HANDLER
 app.post('/api/contact', async (req, res) => {
   const { name, email, message } = req.body;
 
@@ -280,7 +262,6 @@ app.post('/api/contact', async (req, res) => {
   try {
     const transporter = await getTransporter();
 
-    // Send to admin
     await transporter.sendMail({
       from: `"Maison d'Élite Contact" <${SENDER_EMAIL}>`,
       to: SENDER_EMAIL,
@@ -296,22 +277,25 @@ app.post('/api/contact', async (req, res) => {
       `,
     });
 
-    // Confirmation to user
-    await transporter.sendMail({
-      from: `"Maison d'Élite" <${SENDER_EMAIL}>`,
-      to: email,
-      subject: `✅ We've received your message - Maison d'Élite`,
-      html: `
-        <h3>Hi ${safeName},</h3>
-        <p>Thank you for contacting <strong>Maison d'Élite</strong>.</p>
-        <p>We’ve received your message and will respond shortly.</p>
-        <p><strong>Your message:</strong><br>${safeMessage}</p>
-        <br>
-        <p>Warm regards,<br><strong>The Maison d'Élite Team</strong></p>
-        <hr>
-        <p style="font-size:12px;color:#888;">This is an automated response. Please do not reply.</p>
-      `,
-    });
+    try {
+      await transporter.sendMail({
+        from: `"Maison d'Élite" <${SENDER_EMAIL}>`,
+        to: email,
+        subject: `✅ We've received your message - Maison d'Élite`,
+        html: `
+          <h3>Hi ${safeName},</h3>
+          <p>Thank you for contacting <strong>Maison d'Élite</strong>.</p>
+          <p>We’ve received your message and will respond shortly.</p>
+          <p><strong>Your message:</strong><br>${safeMessage}</p>
+          <br>
+          <p>Warm regards,<br><strong>The Maison d'Élite Team</strong></p>
+          <hr>
+          <p style="font-size:12px;color:#888;">This is an automated response. Please do not reply.</p>
+        `,
+      });
+    } catch (e) {
+      console.warn('⚠️ Confirmation to user failed:', e.message);
+    }
 
     res.status(200).json({
       success: true,
