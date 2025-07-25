@@ -1,3 +1,4 @@
+// app.js
 const express = require('express');
 const nodemailer = require('nodemailer');
 const cors = require('cors');
@@ -14,6 +15,11 @@ const SENDER_PASS = 'spvwralflmgzxsxj';
 
 app.use(cors());
 app.use(express.json());
+
+// ✅ Root route added
+app.get('/', (req, res) => {
+  res.send('API is running...');
+});
 
 let bookings = {}; // In-memory store
 
@@ -50,7 +56,6 @@ async function getTransporter() {
   return await transporterPromise;
 }
 
-
 // ------------------------------------
 // Booking Endpoint
 // ------------------------------------
@@ -81,11 +86,12 @@ app.post('/api/book', async (req, res) => {
       date,
       formattedTime,
       members,
-      'https://maison-backend-vsx4.onrender.com' // ✅ Updated Render URL
+      'https://maison-backend-vsx4.onrender.com'
     );
     const userMail = userConfirmationTemplate(name, date, formattedTime, members);
     const transporter = await getTransporter();
 
+    // Send to admin
     await transporter.sendMail({
       from: `"Maison d'Élite" <${SENDER_EMAIL}>`,
       to: SENDER_EMAIL,
@@ -93,6 +99,7 @@ app.post('/api/book', async (req, res) => {
       html: adminMail.html,
     });
 
+    // Send confirmation to user
     await transporter.sendMail({
       from: `"Maison d'Élite" <${SENDER_EMAIL}>`,
       to: email,
@@ -110,7 +117,9 @@ app.post('/api/book', async (req, res) => {
   }
 });
 
-// Admin Response Page
+// ------------------------------------
+// Admin Response Page (UI)
+// ------------------------------------
 app.get('/admin/respond', (req, res) => {
   const { bookingId } = req.query;
   const booking = bookings[bookingId];
@@ -187,7 +196,7 @@ app.get('/admin/respond', (req, res) => {
         }
 
         function submitResponse(status, seats = null) {
-          const url = '/api/respond?bookingId=' + bookingId + '&status=' + status + (seats ? '&seats=' + seats : '');
+          const url = 'https://maison-backend-vsx4.onrender.com/api/respond?bookingId=' + bookingId + '&status=' + status + (seats ? '&seats=' + seats : '');
 
           fetch(url)
             .then(res => res.text())
@@ -210,7 +219,9 @@ app.get('/admin/respond', (req, res) => {
   `);
 });
 
+// ------------------------------------
 // Admin Respond API
+// ------------------------------------
 app.get('/api/respond', async (req, res) => {
   const { bookingId, status, seats } = req.query;
   const booking = bookings[bookingId];
@@ -267,14 +278,14 @@ app.post('/api/contact', async (req, res) => {
   const safeMessage = escapeHTML(message).replace(/\n/g, '<br>');
 
   try {
-    const transporter = await getTransporter(); 
+    const transporter = await getTransporter();
 
     // Send to admin
-    const adminResult = await transporter.sendMail({
-      from: SENDER_EMAIL,
+    await transporter.sendMail({
+      from: `"Maison d'Élite Contact" <${SENDER_EMAIL}>`,
       to: SENDER_EMAIL,
       replyTo: email,
-      subject: `📩 New Contact Form Message`,
+      subject: `📩 New Contact Form Message from ${safeName}`,
       html: `
         <h2>New Contact Message Received</h2>
         <p><strong>Name:</strong> ${safeName}</p>
@@ -285,11 +296,9 @@ app.post('/api/contact', async (req, res) => {
       `,
     });
 
-    console.log('✅ Admin email sent:', adminResult.accepted);
-
     // Confirmation to user
-    const userResult = await transporter.sendMail({
-      from: SENDER_EMAIL,
+    await transporter.sendMail({
+      from: `"Maison d'Élite" <${SENDER_EMAIL}>`,
       to: email,
       subject: `✅ We've received your message - Maison d'Élite`,
       html: `
@@ -303,8 +312,6 @@ app.post('/api/contact', async (req, res) => {
         <p style="font-size:12px;color:#888;">This is an automated response. Please do not reply.</p>
       `,
     });
-
-    console.log('✅ User confirmation sent:', userResult.accepted);
 
     res.status(200).json({
       success: true,

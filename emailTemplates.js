@@ -1,6 +1,5 @@
-// emailTemplates.js
 const formatTime = (timeStr) => {
-  // If it's already in AM/PM format, return as-is
+  if (!timeStr) return '';
   if (timeStr.toLowerCase().includes('am') || timeStr.toLowerCase().includes('pm')) {
     return timeStr.toUpperCase();
   }
@@ -12,7 +11,7 @@ const formatTime = (timeStr) => {
   return `${hour12}:${m} ${suffix}`;
 };
 
-function adminMailTemplate(bookingId, name, email, date, time, members, port) {
+function adminMailTemplate(bookingId, name, email, date, time, members) {
   const formattedTime = formatTime(time);
 
   return {
@@ -28,8 +27,8 @@ function adminMailTemplate(bookingId, name, email, date, time, members, port) {
         <p style="font-size: 16px;"><strong>Members:</strong> ${members}</p>
 
         <div style="margin: 30px 0; text-align: center;">
-          <a href="https://maison-backend-vsx4.onrender.com/admin/respond?bookingId=${bookingId}" 
-            style="background-color: #1abc9c; color: white; padding: 14px 28px; font-size: 16px; text-decoration: none; border-radius: 8px; display: inline-block;">
+          <a href="https://maison-backend-vsx4.onrender.com/admin/respond?bookingId=${bookingId}"
+             style="background-color: #1abc9c; color: white; padding: 14px 28px; font-size: 16px; text-decoration: none; border-radius: 8px; display: inline-block;">
             📨 Respond to this Booking
           </a>
         </div>
