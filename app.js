@@ -241,7 +241,7 @@ app.get('/api/respond', async (req, res) => {
   }
 });
 
-// ✅ UPDATED CONTACT FORM HANDLER
+// ✅ FIXED CONTACT FORM HANDLER
 app.post('/api/contact', async (req, res) => {
   const { name, email, message } = req.body;
 
@@ -262,6 +262,7 @@ app.post('/api/contact', async (req, res) => {
   try {
     const transporter = await getTransporter();
 
+    // Send to admin and user both inside try
     await transporter.sendMail({
       from: `"Maison d'Élite Contact" <${SENDER_EMAIL}>`,
       to: SENDER_EMAIL,
@@ -277,25 +278,21 @@ app.post('/api/contact', async (req, res) => {
       `,
     });
 
-    try {
-      await transporter.sendMail({
-        from: `"Maison d'Élite" <${SENDER_EMAIL}>`,
-        to: email,
-        subject: `✅ We've received your message - Maison d'Élite`,
-        html: `
-          <h3>Hi ${safeName},</h3>
-          <p>Thank you for contacting <strong>Maison d'Élite</strong>.</p>
-          <p>We’ve received your message and will respond shortly.</p>
-          <p><strong>Your message:</strong><br>${safeMessage}</p>
-          <br>
-          <p>Warm regards,<br><strong>The Maison d'Élite Team</strong></p>
-          <hr>
-          <p style="font-size:12px;color:#888;">This is an automated response. Please do not reply.</p>
-        `,
-      });
-    } catch (e) {
-      console.warn('⚠️ Confirmation to user failed:', e.message);
-    }
+    await transporter.sendMail({
+      from: `"Maison d'Élite" <${SENDER_EMAIL}>`,
+      to: email,
+      subject: `✅ We've received your message - Maison d'Élite`,
+      html: `
+        <h3>Hi ${safeName},</h3>
+        <p>Thank you for contacting <strong>Maison d'Élite</strong>.</p>
+        <p>We’ve received your message and will respond shortly.</p>
+        <p><strong>Your message:</strong><br>${safeMessage}</p>
+        <br>
+        <p>Warm regards,<br><strong>The Maison d'Élite Team</strong></p>
+        <hr>
+        <p style="font-size:12px;color:#888;">This is an automated response. Please do not reply.</p>
+      `,
+    });
 
     res.status(200).json({
       success: true,

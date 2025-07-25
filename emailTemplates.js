@@ -1,3 +1,4 @@
+//emailTemplates.js
 const formatTime = (timeStr) => {
   if (!timeStr) return '';
   if (timeStr.toLowerCase().includes('am') || timeStr.toLowerCase().includes('pm')) {
